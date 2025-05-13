@@ -8,16 +8,23 @@ def start_client():
     
     try:
         client_socket.connect((host, port))
-        message = input("Enter message to send: ")
-        client_socket.send(message.encode())
+        print("Connected to server. Type 'exit' to quit")
         
-        response = client_socket.recv(1024).decode()
-        print(f"Server response: {response}")
-        
+        while True:
+            message = input("Enter message: ")
+            if message.lower() == 'exit':
+                break
+            
+            client_socket.send(message.encode())
+            response = client_socket.recv(1024).decode()
+            print(f"Server response: {response}")
+            
     except Exception as e:
         print(f"Error: {e}")
     finally:
         client_socket.close()
+        print("Connection closed")
+
 
 if __name__ == "__main__":
     start_client()
