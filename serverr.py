@@ -70,15 +70,46 @@ def handle_client(client_socket, client_address):
                     response += "Terminal: " (flight["arrival"]["terminal"]) + "\n"
                     response += "gate": (flight["arrival"]["gate"]) + \"n"
                     
-                    
-
-                if not response :
+                if not response:
                     response = "No delayed flights are found."
                 else:
                     response = "There are delayed flights found."
+            elif request.upper().startswith("DETAILS:"):
+                flight_number = request.split(":")[1].strip().upper()
+                found = False
+                
+                for flight in flights:
+                    if flight['flight']['iata'] == flight_number:
+                        response += f"Flight: {flight['flight']['iata']}\n"
+                        response += f"From: {flight['departure']['airport']}\n"
+                        response += f"Arrival: {flight['arrival']['airport']}\n"
+                        response += f"Terminal: {flight['arrival'].get('terminal', 'N/A')}\n"
+                        response += f"Gate: {flight['arrival'].get('gate', 'N/A')}\n\n"
+                        found = True
+                        break 
+                    if not found:
+                        response = "Flight not found."
+                        
+             else :
+                 response = "Invalid request."
+            client_socket.send(response.encode())
+            
+        except Exception as e:
+        print("Error:", e)
+    finally:
+        client_socket.close()
 
-elif request.uppre().startswith("DETAILS:"):
 
+def statr_server():
+    print (" the server is on now and waiting for connection...")
+    while True:
+        client_socket, client_address = server_socket.accept()
+        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+        client_thread.start()
+
+
+start_server()
+            
 
 
                  
