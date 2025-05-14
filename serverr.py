@@ -39,6 +39,65 @@ def handle_client(client_socket, client_address):
         client_name = client_socket.recv(1024).decode().strip()
         print(f"Accepted connection from the client {client_name} from {client_address}")
         while True:
+            request=client_socket.recv(1024).decode().strip()
+            if request=="QUIT":
+                print("Client disconnected")
+                break
+
+            print(f"Client {client_name} ({client_address}) requested: {request}")
+            response = ""
+            if request.upper()=="ARRIVED":
+                for flight in flights :
+                    if flight.get("flight_status") == "landed":
+                        response += "Flight": {flight['flight']['iata']}+"\n"
+                        response += "From": {flight['departure']['airport']}+"\n"
+                        response += "Arrival": {flight['arrival']['airport']}\n"
+                        response += "Terminal": {flight['arrival'].get('terminal')}+"\n"
+                        response += "Gate": {flight['arrival'].get('gate')}+"\n"
+
+ 
+                        
+                if not response:
+                    response ="not arrived flight founded. "
+                    
+            elif request.upper()== "DELAYED":
+                for flight in flights :
+                    delay =flight["arraival"].get["delay"]
+                    if delay >0:
+                    response += "Flight": (flight['flight']['iata']) + "\n"
+                    response += "from": (flight["leaving"]["airport"]) + "\n"
+                    response += "Arrival": (flight["arrival"]["airport"]) + "\n"
+                    response += "Terminal: " (flight["arrival"]["terminal"]) + "\n"
+                    response += "gate": (flight["arrival"]["gate"]) + \"n"
+                    
+                    
+
+                if not response :
+                    response = "No delayed flights are found."
+                else:
+                    response = "There are delayed flights found."
+
+elif request.uppre().startswith("DETAILS:")
+
+
+                 
+                    
+
+
+                    
+
+           
+
+
+                    
+                        
+                    
+
+
+
+
+                
+                
             
         
     
