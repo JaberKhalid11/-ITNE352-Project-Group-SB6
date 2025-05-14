@@ -77,7 +77,8 @@ def handle_client(client_socket, client_address):
                 else:
                     response = "There are delayed flights found."
 
-elif request.uppre().startswith("DETAILS:")
+elif request.uppre().startswith("DETAILS:"):
+
 
 
                  
