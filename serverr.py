@@ -98,7 +98,7 @@ def handle_client(client_socket, client_address):
     finally:
         client_socket.close()
 
-
+# starting the server 
 def statr_server():
     print (" the server is on now and waiting for connection...")
     while True:
