@@ -1,17 +1,32 @@
 import socket
 import threading
-import requests
 import json
+import requests
 
-def fetch_flight_data(icao):
-    response = requests.get(
-        "http://api.aviationstack.com/v1/flights",
-        params={"access_key": "1a606ff09040ef8539b85c3e2ab198fb", "arr_icao": icao, "limit": 100}
-    )
-    flights = response.json().get("data", [])
-    with open("group_SB6.json", "w") as f:
-        json.dump(flights, f, indent=4)
-    return flights
+API_KEY = "1a606ff09040ef8539b85c3e2ab198fb"
+API_URL = "http://api.aviationstack.com/v1/flights"
+JSON_FILE = "group_SB6.json"
+SERVER_HOST = "127.0.0.1"
+SERVER_PORT = 5050
+
+def fetch_and_store_data(icao):
+    params = {'access_key': API_KEY, 'arr_icao': icao, 'limit': 100}
+    try:
+        response = requests.get(API_URL, params=params)
+        data = response.json().get('data', [])
+        with open(JSON_FILE, 'w') as f:
+            json.dump(data, f, indent=4)
+        return data
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch API data: {e}")
+        return []
+
+def load_flight_data():
+    try:
+        with open(JSON_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
 
 def handle_client(conn, addr, client_name, flights):
     print(f"[CONNECTED] {client_name} ({addr})")
@@ -20,9 +35,9 @@ def handle_client(conn, addr, client_name, flights):
             request = conn.recv(1024).decode()
             if not request:
                 break
+            print(f"[REQUEST] From {client_name}: {request}")
 
             if request == '1':
-                # Arrived flights
                 result = [
                     {
                         'iata': f.get('flight', {}).get('iata'),
@@ -31,12 +46,10 @@ def handle_client(conn, addr, client_name, flights):
                         'terminal': f.get('arrival', {}).get('terminal'),
                         'gate': f.get('arrival', {}).get('gate')
                     }
-                    for f in flights if f.get('flight_status') == 'landed'
-                ]
+                    for f in flights if f.get('flight_status') == 'landed']
                 conn.sendall(json.dumps(result).encode())
 
             elif request == '2':
-                # Delayed flights
                 result = [
                     {
                         'iata': f.get('flight', {}).get('iata'),
@@ -47,13 +60,11 @@ def handle_client(conn, addr, client_name, flights):
                         'gate': f.get('arrival', {}).get('gate'),
                         'delay': f.get('arrival', {}).get('delay')
                     }
-                    for f in flights if f.get('arrival', {}).get('delay')
-                ]
+                    for f in flights if f.get('arrival', {}).get('delay')]
                 conn.sendall(json.dumps(result).encode())
 
             elif request.startswith('3:'):
-                # Specific flight details
-                code = request[2:].strip().upper()
+                code = request[2:].strip()
                 f = next((f for f in flights if f.get('flight', {}).get('iata') == code), None)
                 if f:
                     result = {
@@ -76,27 +87,27 @@ def handle_client(conn, addr, client_name, flights):
                 break
             else:
                 conn.sendall(json.dumps({'error': 'Invalid request'}).encode())
-
     except Exception as e:
         print(f"[ERROR] {e}")
     finally:
         conn.close()
         print(f"[DISCONNECTED] {client_name}")
-        
+
 def start_server():
+    icao = input("Enter target airport ICAO code (e.g., OBBI): ").strip().upper()
+    flights = fetch_and_store_data(icao)
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('127.0.0.1', 5050))
+    server.bind((SERVER_HOST, SERVER_PORT))
     server.listen(5)
-    print("[SERVER] Listening...")
+    print(f"[SERVER] Listening on {SERVER_HOST}:{SERVER_PORT}")
 
     while True:
         conn, addr = server.accept()
         conn.sendall(b"Enter your name: ")
         client_name = conn.recv(1024).decode().strip()
-        print(f"[NEW CONNECTION] {client_name} ({addr})")
         thread = threading.Thread(target=handle_client, args=(conn, addr, client_name, flights))
         thread.start()
-        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     start_server()
