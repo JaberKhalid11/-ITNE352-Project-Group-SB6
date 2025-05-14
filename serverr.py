@@ -72,8 +72,7 @@ def handle_client(client_socket, client_address):
                     
                 if not response:
                     response = "No delayed flights are found."
-                else:
-                    response = "There are delayed flights found."
+                
             elif request.upper().startswith("DETAILS:"):
                 flight_number = request.split(":")[1].strip().upper()
                 found = False
