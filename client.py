@@ -1,6 +1,6 @@
 import socket 
 
-# server setting 
+# information for the server:
 host ="127.0.0.1"
 port=4096
 
@@ -8,11 +8,11 @@ port=4096
 client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((host,port))
 
-#sending the user name 
+#sending the user name :
 name=input("please enter your name : ")
 client_socket.send(name.encode())
 
-## the main loop
+## the main loop.
 
 while True:
   print("\n-----main menu----")
@@ -36,13 +36,13 @@ elif choice =="4":
 else:
   print("Invalid choice. please tyy again.")
   continue
-# the server have resivce and respnce 
+# the server have resivce and respnce.
 
 responce =client_socket.recv(10000).decode()
 print(f"------ the server respnce-----")
 print(responce)
 
-# closing the connection 
+# closing the connection. 
 client_socket.close()
 pritn("disconet from the server")
   
