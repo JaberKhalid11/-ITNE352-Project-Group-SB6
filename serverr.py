@@ -22,6 +22,29 @@ if not os.path.exists("SB6.jason"):
         }
 print("[INFO] SB5.json not found. Fetching data from API")
 response = requests.get(api_key, params=params)
+if response.status_code == 200:
+    with open("SBS.json","w") as file :
+        json.dump(response.json(),file,indent=4)
+        print("[INFO] SB6.json created successfully.")
+else:
+    print("ERROR: Failed to fetch data from API.")
+    exit()
+
+#load the data 
+with open ("SB6","r")
+flights=data.get("data",[])
+
+def handle_client(client_socket, client_address):
+    try:
+        client_name = client_socket.recv(1024).decode().strip()
+        print(f"Accepted connection from the client {client_name} from {client_address}")
+        while True:
+            
+        
+    
+        
+
+
 
 
 
