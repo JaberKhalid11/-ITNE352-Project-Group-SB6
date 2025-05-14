@@ -91,8 +91,12 @@ def start_server():
 
     while True:
         conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
+        conn.sendall(b"Enter your name: ")
+        client_name = conn.recv(1024).decode().strip()
+        print(f"[NEW CONNECTION] {client_name} ({addr})")
+        thread = threading.Thread(target=handle_client, args=(conn, addr, client_name, flights))
         thread.start()
+        print(f"[ACTIVE CONNECTIONS] {threading.active_count() - 1}")
 
 if __name__ == "__main__":
     start_server()
