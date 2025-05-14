@@ -29,7 +29,7 @@ elif choice =="2":
   client_socket.send("Delayed".encode())
 elif choice =="3":
   code=input("please Enter the flight IATA code").strip().upper()
-  client_socket.send("the Details{flight_code}".encode())
+  client_socket.send(f"DETAILS:{code}".encode())
 elif choice =="4":
   client_socket.send("Quit".encode())
   break
@@ -42,7 +42,7 @@ responce =client_socket.recv(10000).decode()
 print(f"------ the server respnce-----")
 print(responce)
 
-# the closing the connection 
+# closing the connection 
 client_socket.close()
 pritn("disconet from the server")
   
