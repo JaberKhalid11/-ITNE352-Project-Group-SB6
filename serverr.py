@@ -30,7 +30,7 @@ if not os.path.exists("SB6.json"):
 print("[INFO] SB6.json not found. Fetching data from API")
 response = requests.get(url, params=params)
 if response.status_code == 200:
-    with open("SBS.json","w") as file :
+    with open("SB6.json","w") as file :
         json.dump(response.json(),file,indent=4)
         print("[INFO] SB6.json created successfully.")
 else:
