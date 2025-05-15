@@ -96,12 +96,13 @@ def handle_client(client_socket, client_address):
                         found = True
                         break
                     if not found:
-                    response = "Flight not found."
+                        response = "Flight not found."
 
             else:
                 response = "Invalid request."
 
             client_socket.send(response.encode())
+
 
             
     except Exception as e:
