@@ -1,5 +1,5 @@
 import socket 
-import tkinter 
+import tkinter as tk
 from tkinter import messagebox,scrolledtext
 from PIL import Image, ImageTk 
 
@@ -19,22 +19,23 @@ client_socket.send(name.encode())
 # creat the GUI widow 
 window=tk.Tk()
 window.title(" the filght info")
-window.gemetry("600x500")
+window.geometry("600x500")
 window.resizable(False,False)
 
 # adding the logo 
-logo_image=image.open("uob_logo.png")
+logo_image=Image.open("uob_logo.png")
 logo_image=logo_image.resize((100,100))
-logo_label,image=logo_photo
+logo_photo=ImageTk.PhotoImage(logo_image)
+logo_label=tk.Label(window, image=logo_photo)
+logo_label,image=logo_photo # to make sure the photo will not delete 
 logo_label.pack(pady=5)
-
 
 
 ## sending the user name for the server.
 def send_name():
-  name=name_entry.get().strip()
+  name=name_entery.get().strip()
   if not name:
-    messagebox.showwarning(" the name is not correct!","please enter the right name")
+    messagebox.showwarning("the name is not correct!","please enter the right name")
     return 
   client_socket.send(name.encode())
   name_frame.pack_forget()
@@ -58,13 +59,13 @@ def send_details():
   if not code :
     messagebox.showwarning("the IATA code is wrong! or missing!","please enter the right IATA")
     return
-  client_socket.send(f"Details:(code)".encode())
+  client_socket.send(f"Details:{code}".encode())
   display_response()
 
-# the messge respnce form the server
+# the messge respponse form the server
 def display_response():
   respponse=client_socket.recv(4096).decode()
-  output_text.insert(tk.END,f"{respnce}\n")
+  output_text.insert(tk.END,f"{respponse}\n")
   output_text.see(tk.END)
 
 # QUIT the app
@@ -76,10 +77,10 @@ def quit_app():
 ## the name the user will type it.
 name_frame=tk.frame(window)
 tk.Label(name_frame, text="please enter the name:",font=("Arial",14)).pack(pady=10)
-name_entery=tk.Entry(name_frame,font=("Arial",14)).width=40)
-name_entry.pack()
-tk.Button(name_fram,text="connect",font=("Arial",14),command=send_name).pake(pady=10)
-name_frame.pake(pady=20)
+name_entery=tk.Entry(name_frame,font=("Arial",14),width=40)
+name_entery.pack()
+tk.Button(name_frame,text="connect",font=("Arial",14),command=send_name).pack(pady=10)
+name_frame.pack(pady=20)
 
 #the menu main fram the will contain function
 main_menu =tk.fram(window)
@@ -91,16 +92,16 @@ tk.Button(main_menu,text="Show the Delayed filghts",font=("Arial",12) ,width=30,
 
 
 # enter the IATA and the details of it.
-iata_frma=tk.Frame(main_menu)
-tk.Label(iata_fram ,text="IATA code",font=("Arial",14)).pack(side=tk.LEFT)
+iata_frame=tk.Frame(main_menu)
+tk.Label(iata_frame ,text="IATA code",font=("Arial",14)).pack(side=tk.LEFT)
 iata_entry=tk.Entry(iata_frame,font=("Arial",14),width=15)
 iata_entry.pack(side=tk.LEFT,padx=5)
-tk.Button(iata_fram,text="Show the Flight Details",font=("Arial",14),command=send_details).pack(side=tk.LEFT)
-iata_fram.pack(pady=10)
+tk.Button(iata_frame,text="Show the Flight Details",font=("Arial",14),command=send_details).pack(side=tk.LEFT)
+iata_frame.pack(pady=10)
 
 #the output
-output= scrolledtext.ScrolledText(main_menu, width=80 , height=20 ,font=("Arial",12))
-output.pack(pady=10)
+output_text= scrolledtext.ScrolledText(main_menu, width=80 , height=20 ,font=("Arial",12))
+output_text.pack(pady=10)
 
 # start the app
 window.mainloop()
