@@ -27,7 +27,7 @@ if not os.path.exists("SB6.json"):
             'arr_icao': icao_code.strip().upper(),
             'limit': 100
         }
-print("[INFO] SB5.json not found. Fetching data from API")
+print("[INFO] SB6.json not found. Fetching data from API")
 response = requests.get(url, params=params)
 if response.status_code == 200:
     with open("SBS.json","w") as file :
