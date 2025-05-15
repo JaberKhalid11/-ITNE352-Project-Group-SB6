@@ -85,7 +85,7 @@ def handle_client(client_socket, client_address):
             elif request.upper().startswith("DETAILS:"):
                 flight_number = request.split(":")[1].strip().upper()
                 found = False
-                
+
                 for flight in flights:
                     if flight['flight']['iata'] == flight_number:
                         response += f"Flight: {flight['flight']['iata']}\n"
@@ -94,13 +94,15 @@ def handle_client(client_socket, client_address):
                         response += f"Terminal: {flight['arrival'].get('terminal', 'N/A')}\n"
                         response += f"Gate: {flight['arrival'].get('gate', 'N/A')}\n\n"
                         found = True
-                        break 
+                        break
                     if not found:
-                        response = "Flight not found."
-                        
-                else :
-                 response = "Invalid request."
+                    response = "Flight not found."
+
+            else:
+                response = "Invalid request."
+
             client_socket.send(response.encode())
+
             
     except Exception as e:
         print("Error:", e)
