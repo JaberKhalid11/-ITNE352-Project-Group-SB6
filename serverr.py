@@ -1,7 +1,7 @@
 import socket
 import threading
 import json
-import requests  # type: ignore 
+import requests  
 import os 
 
 
@@ -9,6 +9,11 @@ import os
 ###creat the TCP server
 host="127.0.0.1"
 port=4096
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind((host, port))
+server_socket.listen(5)
+print("The server has been started.")
+
 
 # featch data 
 api_key="375026d7df2905c47ad49fb346e4e0a6"
@@ -46,6 +51,7 @@ def handle_client(client_socket, client_address):
 
             print(f"Client {client_name} ({client_address}) requested: {request}")
             response = ""
+            # the arrived flights
             if request.upper()=="ARRIVED":
                 for flight in flights :
                     if flight.get("flight_status") == "landed":
@@ -59,7 +65,7 @@ def handle_client(client_socket, client_address):
                         
                 if not response:
                     response ="not arrived flight founded. "
-                    
+                    #the delayed flights
             elif request.upper()== "DELAYED":
                 for flight in flights :
                     delay =flight["arraival"].get["delay"]
@@ -72,7 +78,7 @@ def handle_client(client_socket, client_address):
                     
                 if not response:
                     response = "No delayed flights are found."
-                
+                #the specific flight details
             elif request.upper().startswith("DETAILS:"):
                 flight_number = request.split(":")[1].strip().upper()
                 found = False
