@@ -23,19 +23,19 @@ url="http://api.aviationstack.com/v1/flights"
 icao_code = input("Enter the ICAO code of the airport: ")
 if not os.path.exists("SB6.json"):
     params = {
-            'access_key': api_key,
-            'arr_icao': icao_code.strip().upper(),
-            'limit': 100
-        }
-print("[INFO] SB6.json not found. Fetching data from API")
-response = requests.get(url, params=params)
-if response.status_code == 200:
-    with open("SB6.json","w") as file :
-        json.dump(response.json(),file,indent=4)
-        print("[INFO] SB6.json created successfully.")
-else:
-    print("ERROR: Failed to fetch data from API.")
-    exit()
+        'access_key': api_key,
+        'arr_icao': icao_code.strip().upper(),
+        'limit': 100
+    }
+    print("[INFO] SB6.json not found. Fetching data from API")
+    response = requests.get(url, params=params)
+    if response.status_code == 200:
+        with open("SB6.json", "w") as file:
+            json.dump(response.json(), file, indent=4)
+            print("[INFO] SB6.json created successfully.")
+    else:
+        print("ERROR: Failed to fetch data from API.")
+        exit()
 
 #load the data 
 file=open("SB6.json","r")
@@ -58,7 +58,7 @@ def handle_client(client_socket, client_address):
             if request.upper()=="ARRIVED":
                 for flight in flights :
                     if flight.get("flight_status") == "landed":
-                        response += f"Flight: {flight['flight']['iata']}n"
+                        response += f"Flight: {flight['flight']['iata']}\n"
                         response += f"From: {flight['departure']['airport']}\n"
                         response += f"Arrival: {flight['arrival']['airport']}\n"
                         response += f"Terminal: {flight['arrival'].get('terminal')}\n"
@@ -108,8 +108,8 @@ def handle_client(client_socket, client_address):
         client_socket.close()
 
 # starting the server 
-def statr_server():
-    print (" the server is on now and waiting for connection...")
+def start_server():
+    print("The server is on now and waiting for connections...")
     while True:
         client_socket, client_address = server_socket.accept()
         client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
