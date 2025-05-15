@@ -1,5 +1,7 @@
 import socket
 import json
+import tkinter as tk
+from tkinter import messagebox, simpledialog, scrolledtext
 
 SERVER_HOST = "127.0.0.1"
 SERVER_PORT = 5050
@@ -52,4 +54,5 @@ def main():
     print("Disconnected from server.")
 
 if __name__ == "__main__":
-      main()
+    root = tk.Tk()
+    root.mainloop()
