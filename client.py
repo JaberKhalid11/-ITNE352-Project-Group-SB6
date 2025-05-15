@@ -12,9 +12,7 @@ port=4096
 client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((host,port))
 
-#sending the user name :
-name=input("please enter your name : ")
-client_socket.send(name.encode())
+
 
 # creat the GUI widow 
 window=tk.Tk()
@@ -27,20 +25,19 @@ logo_image=Image.open("uob_logo.png")
 logo_image=logo_image.resize((100,100))
 logo_photo=ImageTk.PhotoImage(logo_image)
 logo_label=tk.Label(window, image=logo_photo)
-logo_label,image=logo_photo # to make sure the photo will not delete 
+logo_label.image=logo_photo # to make sure the photo will not delete 
 logo_label.pack(pady=5)
 
 
 ## sending the user name for the server.
 def send_name():
-  name=name_entery.get().strip()
-  if not name:
-    messagebox.showwarning("the name is not correct!","please enter the right name")
-    return 
-  client_socket.send(name.encode())
-  name_frame.pack_forget()
-  main_menu.pack(pady=20)
-
+    name = name_entery.get().strip()
+    if not name:
+        messagebox.showwarning("Missing Name", "Please enter your name!")
+        return
+    client_socket.send(name.encode())
+    name_frame.pack_forget()
+    main_menu.pack(pady=20)
 # ----the menu that will show----
 
 # the arriver
@@ -75,15 +72,15 @@ def quit_app():
   window.destroy()
 
 ## the name the user will type it.
-name_frame=tk.frame(window)
+name_frame = tk.Frame(window)
 tk.Label(name_frame, text="please enter the name:",font=("Arial",14)).pack(pady=10)
-name_entery=tk.Entry(name_frame,font=("Arial",14),width=40)
-name_entery.pack()
+name_entry=tk.Entry(name_frame,font=("Arial",14),width=40)
+name_entry.pack()
 tk.Button(name_frame,text="connect",font=("Arial",14),command=send_name).pack(pady=10)
 name_frame.pack(pady=20)
 
 #the menu main fram the will contain function
-main_menu =tk.fram(window)
+main_menu = tk.Frame(window)
 
 # the buttons for the requset that the user will press 
 tk.Label(main_menu ,text="the main menu",font=("Arial",14,"bold")).pack(pady=5)
