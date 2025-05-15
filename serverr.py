@@ -95,9 +95,9 @@ def handle_client(client_socket, client_address):
                         response += f"Gate: {flight['arrival'].get('gate', 'N/A')}\n\n"
                         found = True
                         break
-                    if not found:
-                        response = "Flight not found."
-
+                    
+                if not found:
+                    response = f"No flight found with IATA code {flight_number}."
             else:
                 response = "Invalid request."
 
