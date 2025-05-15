@@ -1,58 +1,114 @@
 import socket
 import threading
-# This is a simple TCP server that listens for incoming connections and handles them in a multithreaded manner.                                         
+import json
+import requests
 
-#multithreaded server
+API_KEY = "1a606ff09040ef8539b85c3e2ab198fb"
+API_URL = "http://api.aviationstack.com/v1/flights"
+JSON_FILE = "group_SB6.json"
+SERVER_HOST = "127.0.0.1"
+SERVER_PORT = 5050
 
-class ClientHandler(threading.Thread):
-    def __init__(self, client_socket, address):
-        super().__init__()
-        self.client_socket = client_socket
-        self.address = address
+def fetch_and_store_data(icao):
+    params = {'access_key': API_KEY, 'arr_icao': icao, 'limit': 100}
+    try:
+        response = requests.get(API_URL, params=params)
+        data = response.json().get('data', [])
+        with open(JSON_FILE, 'w') as f:
+            json.dump(data, f, indent=4)
+        return data
+    except Exception as e:
+        print(f"[ERROR] Failed to fetch API data: {e}")
+        return []
 
+def load_flight_data():
+    try:
+        with open(JSON_FILE, 'r') as f:
+            return json.load(f)
+    except:
+        return []
 
-def run(self):
-        print(f"New connection from {self.address}")
-        try:
-            while True:
-                data = self.client_socket.recv(1024).decode()
-                if not data:
-                    break
-                print(f"Received from {self.address}: {data}")
-                response = f"Server received: {data}"
-                self.client_socket.send(response.encode())
-        except Exception as e:
-            print(f"Error with {self.address}: {e}")
-        finally:
-            self.client_socket.close()
-            print(f"Connection with {self.address} closed")
+def handle_client(conn, addr, client_name, flights):
+    print(f"[CONNECTED] {client_name} ({addr})")
+    try:
+        while True:
+            request = conn.recv(1024).decode()
+            if not request:
+                break
+            print(f"[REQUEST] From {client_name}: {request}")
 
+            if request == '1':
+                result = [
+                    {
+                        'iata': f.get('flight', {}).get('iata'),
+                        'dep_airport': f.get('departure', {}).get('airport'),
+                        'arr_time': f.get('arrival', {}).get('scheduled'),
+                        'terminal': f.get('arrival', {}).get('terminal'),
+                        'gate': f.get('arrival', {}).get('gate')
+                    }
+                    for f in flights if f.get('flight_status') == 'landed']
+                conn.sendall(json.dumps(result).encode())
+
+            elif request == '2':
+                result = [
+                    {
+                        'iata': f.get('flight', {}).get('iata'),
+                        'dep_airport': f.get('departure', {}).get('airport'),
+                        'dep_time': f.get('departure', {}).get('scheduled'),
+                        'arr_time': f.get('arrival', {}).get('estimated'),
+                        'terminal': f.get('arrival', {}).get('terminal'),
+                        'gate': f.get('arrival', {}).get('gate'),
+                        'delay': f.get('arrival', {}).get('delay')
+                    }
+                    for f in flights if f.get('arrival', {}).get('delay')]
+                conn.sendall(json.dumps(result).encode())
+
+            elif request.startswith('3:'):
+                code = request[2:].strip()
+                f = next((f for f in flights if f.get('flight', {}).get('iata') == code), None)
+                if f:
+                    result = {
+                        'iata': f.get('flight', {}).get('iata'),
+                        'dep_airport': f.get('departure', {}).get('airport'),
+                        'dep_terminal': f.get('departure', {}).get('terminal'),
+                        'dep_gate': f.get('departure', {}).get('gate'),
+                        'arr_airport': f.get('arrival', {}).get('airport'),
+                        'arr_terminal': f.get('arrival', {}).get('terminal'),
+                        'arr_gate': f.get('arrival', {}).get('gate'),
+                        'status': f.get('flight_status'),
+                        'dep_time': f.get('departure', {}).get('scheduled'),
+                        'arr_time': f.get('arrival', {}).get('scheduled')
+                    }
+                else:
+                    result = {'error': 'Flight not found.'}
+                conn.sendall(json.dumps(result).encode())
+
+            elif request.lower() == 'quit':
+                break
+            else:
+                conn.sendall(json.dumps({'error': 'Invalid request'}).encode())
+    except Exception as e:
+        print(f"[ERROR] {e}")
+    finally:
+        conn.close()
+        print(f"[DISCONNECTED] {client_name}")
 
 def start_server():
-    host = '127.0.0.1'
-    port = 5555
+    icao = input("Enter target airport ICAO code (e.g., OBBI): ").strip().upper()
+    flights = fetch_and_store_data(icao)
 
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((host, port))
-    server_socket.listen(1)
-    print(f"Server listening on {host}:{port}")
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.bind((SERVER_HOST, SERVER_PORT))
+    server.listen(5)
+    print(f"[SERVER] Listening on {SERVER_HOST}:{SERVER_PORT}")
 
     while True:
-        client_socket, addr = server_socket.accept()
-        print(f"Connection from {addr}")
-        
-        try:
-            data = client_socket.recv(1024).decode()
-            if data:
-                print(f"Received: {data}")
-                response = "Message received by server!"
-                client_socket.send(response.encode())
-        except Exception as e:
-            print(f"Error: {e}")
-        finally:
-            client_socket.close()
-            print("Connection closed")
-            
-            
-if __name__ == "__main__":
+        conn, addr = server.accept()
+        conn.sendall(b"Enter your name: ")
+        client_name = conn.recv(1024).decode().strip()
+        thread = threading.Thread(target=handle_client, args=(conn, addr, client_name, flights))
+        thread.start()
+
+if __name__ == '__main__':
     start_server()
+    # server is ready to accept connections
