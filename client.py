@@ -6,7 +6,7 @@ from PIL import Image, ImageTk
 
 # information for the server:
 host ="127.0.0.1"
-port=4096
+port=5050
 
 #creat the socket and connecting to the server 
 client_socket=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
