@@ -3,6 +3,7 @@ import threading
 import json
 import requests  
 import os 
+from asyncio import start_server
 
 
 
@@ -19,14 +20,15 @@ print("The server has been started.")
 api_key="375026d7df2905c47ad49fb346e4e0a6"
 url="http://api.aviationstack.com/v1/flights"
 
-if not os.path.exists("SB6.jason"):
+icao_code = input("Enter the ICAO code of the airport: ")
+if not os.path.exists("SB6.json"):
     params = {
             'access_key': api_key,
             'arr_icao': icao_code.strip().upper(),
             'limit': 100
         }
 print("[INFO] SB5.json not found. Fetching data from API")
-response = requests.get(api_key, params=params)
+response = requests.get(url, params=params)
 if response.status_code == 200:
     with open("SBS.json","w") as file :
         json.dump(response.json(),file,indent=4)
@@ -36,7 +38,8 @@ else:
     exit()
 
 #load the data 
-with open ("SB6","r")
+file=open("SB6.json","r")
+data=json.load(file)
 flights=data.get("data",[])
 
 def handle_client(client_socket, client_address):
@@ -55,11 +58,11 @@ def handle_client(client_socket, client_address):
             if request.upper()=="ARRIVED":
                 for flight in flights :
                     if flight.get("flight_status") == "landed":
-                        response += "Flight": {flight['flight']['iata']}+"\n"
-                        response += "From": {flight['departure']['airport']}+"\n"
-                        response += "Arrival": {flight['arrival']['airport']}\n"
-                        response += "Terminal": {flight['arrival'].get('terminal')}+"\n"
-                        response += "Gate": {flight['arrival'].get('gate')}+"\n"
+                        response += f"Flight: {flight['flight']['iata']}n"
+                        response += f"From: {flight['departure']['airport']}\n"
+                        response += f"Arrival: {flight['arrival']['airport']}\n"
+                        response += f"Terminal: {flight['arrival'].get('terminal')}\n"
+                        response += f"Gate: {flight['arrival'].get('gate')}\n"
 
  
                         
@@ -70,11 +73,11 @@ def handle_client(client_socket, client_address):
                 for flight in flights :
                     delay =flight["arraival"].get["delay"]
                     if delay >0:
-                    response += "Flight": (flight['flight']['iata']) + "\n"
-                    response += "from": (flight["leaving"]["airport"]) + "\n"
-                    response += "Arrival": (flight["arrival"]["airport"]) + "\n"
-                    response += "Terminal: " (flight["arrival"]["terminal"]) + "\n"
-                    response += "gate": (flight["arrival"]["gate"]) + \"n"
+                     response += f"Flight: {flight['flight']['iata']}\n"
+                     response += f"from: {flight['departure']['airport']} \n"
+                     response += f"Arrival: {flight['arrival']['airport']}\n"
+                     response += f"Terminal:  {flight['arrival']['terminal']} \n"
+                     response += f"gate: {flight['arrival']['gate']}\n"
                     
                 if not response:
                     response = "No delayed flights are found."
@@ -95,11 +98,11 @@ def handle_client(client_socket, client_address):
                     if not found:
                         response = "Flight not found."
                         
-             else :
+                else :
                  response = "Invalid request."
             client_socket.send(response.encode())
             
-        except Exception as e:
+    except Exception as e:
         print("Error:", e)
     finally:
         client_socket.close()
@@ -112,8 +115,8 @@ def statr_server():
         client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
         client_thread.start()
 
-
 start_server()
+
             
 
 
