@@ -1,156 +1,125 @@
+# server.py
 import socket
 import threading
 import json
-import requests  
-import os 
-from asyncio import start_server
+import requests
+import os
 
 
+<<<<<<< HEAD
+# Setup server
+host = "127.0.0.1"
+port = 5050
+=======
 
 ###creat the TCP server
 host="127.0.0.1"
-port=4096
+port=5050
+>>>>>>> 9ab38c37f4f9223bbb18fb5a13f3ce18fefe36d5
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((host, port))
 server_socket.listen(5)
-print("The server has been started.")
+print("[SERVER STARTED] Waiting for clients...")
 
 
-# featch data 
-api_key="375026d7df2905c47ad49fb346e4e0a6"
-url="http://api.aviationstack.com/v1/flights"
+# Get airport ICAO code and fetch data
+icao_code = input("Enter ICAO code: ").strip().upper()
+file_name = "SB6.json"  
 
-icao_code = input("Enter the ICAO code of the airport: ")
-if not os.path.exists("SB6.json"):
-    params = {
-        'access_key': api_key,
-        'arr_icao': icao_code.strip().upper(),
-        'limit': 100
-    }
-    print("[INFO] SB6.json not found. Fetching data from API")
+if not os.path.exists(file_name):
+    print("[INFO] Getting data from API...")
+    url = "http://api.aviationstack.com/v1/flights"
+    params = {'access_key': '375026d7df2905c47ad49fb346e4e0a6', 'arr_icao': icao_code, 'limit': 100}
     response = requests.get(url, params=params)
     if response.status_code == 200:
-        with open("SB6.json", "w") as file:
-            json.dump(response.json(), file, indent=4)
-            print("[INFO] SB6.json created successfully.")
+        with open(file_name, "w") as f:
+            json.dump(response.json(), f, indent=4)
+        print("[INFO] Data saved.")
     else:
-        print("ERROR: Failed to fetch data from API.")
+        print("[ERROR] Failed to get data.")
         exit()
 
-#load the data 
-file=open("SB6.json","r")
-data=json.load(file)
-flights=data.get("data",[])
 
-def handle_client(client_socket, client_address):
+# Load data
+with open(file_name, "r") as f:
+    flights = json.load(f).get("data", [])
+
+
+# Handle each client
+def handle_client(client_socket, addr):
     try:
-        client_name = client_socket.recv(1024).decode().strip()
-        print(f"Accepted connection from the client {client_name} from {client_address}")
+        name = client_socket.recv(1024).decode().strip()
+        print(f"[CONNECTED] {name} from {addr}")
+
         while True:
-            request=client_socket.recv(1024).decode().strip()
-            if request=="QUIT":
-                print("Client disconnected")
+            msg = client_socket.recv(1024).decode().strip()
+            if msg == "QUIT":
+                print(f"[DISCONNECTED] {name}")
                 break
 
-            print(f"Client {client_name} ({client_address}) requested: {request}")
-            response = ""
-            # the arrived flights
-            if request.upper()=="ARRIVED":
-                for flight in flights :
-                    if flight.get("flight_status") == "landed":
-                        response += f"Flight: {flight['flight']['iata']}\n"
-                        response += f"From: {flight['departure']['airport']}\n"
-                        response += f"Arrival: {flight['arrival']['airport']}\n"
-                        response += f"Terminal: {flight['arrival'].get('terminal')}\n"
-                        response += f"Gate: {flight['arrival'].get('gate')}\n"
+            print(f"[REQUEST] {name}: {msg}")
+            reply = ""
 
- 
-                        
-                if not response:
-                    response ="not arrived flight founded. "
-                    #the delayed flights
-            elif request.upper()== "DELAYED":
-                for flight in flights :
-                    delay =flight["arraival"].get["delay"]
-                    if delay >0:
-                     response += f"Flight: {flight['flight']['iata']}\n"
-                     response += f"from: {flight['departure']['airport']} \n"
-                     response += f"Arrival: {flight['arrival']['airport']}\n"
-                     response += f"Terminal:  {flight['arrival']['terminal']} \n"
-                     response += f"gate: {flight['arrival']['gate']}\n"
-                    
-                if not response:
-                    response = "No delayed flights are found."
-                #the specific flight details
-            elif request.upper().startswith("DETAILS:"):
-                flight_number = request.split(":")[1].strip().upper()
-                found = False
-
+            if msg == "ARRIVED":
                 for flight in flights:
-                    if flight['flight']['iata'] == flight_number:
-                        response += f"Flight: {flight['flight']['iata']}\n"
-                        response += f"From: {flight['departure']['airport']}\n"
-                        response += f"Arrival: {flight['arrival']['airport']}\n"
-                        response += f"Terminal: {flight['arrival'].get('terminal', 'N/A')}\n"
-                        response += f"Gate: {flight['arrival'].get('gate', 'N/A')}\n\n"
-                        found = True
+                    if flight.get("flight_status") == "landed":
+                        reply += f"Flight: {flight['flight']['iata']}\n"
+                        reply += f"From: {flight['departure']['airport']}\n"
+                        reply += f"To: {flight['arrival']['airport']}\n"
+                        reply += f"Terminal: {flight['arrival'].get('terminal', 'N/A')}\n"
+                        reply += f"Gate: {flight['arrival'].get('gate', 'N/A')}\n\n"
+                if not reply:
+                    reply = "No arrived flights found."
+
+            elif msg == "DELAYED":
+                for flight in flights:
+                    delay = flight.get("arrival", {}).get("delay", 0)
+                    if delay and delay > 0:
+                        reply += f"Flight: {flight['flight']['iata']}\n"
+                        reply += f"From: {flight['departure']['airport']}\n"
+                        reply += f"To: {flight['arrival']['airport']}\n"
+                        reply += f"Departure Time: {flight['departure'].get('scheduled', 'N/A')}\n"
+                        reply += f"Arrival Time: {flight['arrival'].get('scheduled', 'N/A')}\n"
+                        reply += f"Delay: {delay} minutes\n"
+                        reply += f"Terminal: {flight['arrival'].get('terminal', 'N/A')}\n"
+                        reply += f"Gate: {flight['arrival'].get('gate', 'N/A')}\n\n"
+                if not reply:
+                    reply = "No delayed flights found."
+
+            elif msg.startswith("Details:"):
+                code = msg.split(":")[1].strip().upper()
+                for flight in flights:
+                    if flight['flight']['iata'] == code:
+                        reply += f"Flight: {code}\n"
+                        reply += f"From: {flight['departure']['airport']}\n"
+                        reply += f"Gate: {flight['departure'].get('gate', 'N/A')}\n"
+                        reply += f"Terminal: {flight['departure'].get('terminal', 'N/A')}\n"
+                        reply += f"To: {flight['arrival']['airport']}\n"
+                        reply += f"Gate: {flight['arrival'].get('gate', 'N/A')}\n"
+                        reply += f"Terminal: {flight['arrival'].get('terminal', 'N/A')}\n"
+                        reply += f"Status: {flight.get('flight_status', 'N/A')}\n"
+                        reply += f"Departure Time: {flight['departure'].get('scheduled', 'N/A')}\n"
+                        reply += f"Arrival Time: {flight['arrival'].get('scheduled', 'N/A')}\n"
                         break
-                    
-                if not found:
-                    response = f"No flight found with IATA code {flight_number}."
+                if not reply:
+                    reply = f"No flight found with IATA code {code}."
+
             else:
-                response = "Invalid request."
+                reply = "Invalid request."
 
-            client_socket.send(response.encode())
+            client_socket.send(reply.encode())
 
-
-            
     except Exception as e:
-        print("Error:", e)
+        print("[ERROR]", e)
     finally:
         client_socket.close()
+        
 
-# starting the server 
+# Start listening
 def start_server():
-    print("The server is on now and waiting for connections...")
     while True:
-        client_socket, client_address = server_socket.accept()
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
-        client_thread.start()
+        client, addr = server_socket.accept()
+        thread = threading.Thread(target=handle_client, args=(client, addr))
+        thread.start()
 
 start_server()
-
-            
-
-
-                 
-                    
-
-
-                    
-
-           
-
-
-                    
-                        
-                    
-
-
-
-
-                
-                
-            
-        
-    
-        
-
-
-
-
-
-
-
-
-    
