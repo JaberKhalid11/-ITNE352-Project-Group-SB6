@@ -2,7 +2,7 @@
 import socket
 import tkinter as tk
 from tkinter import messagebox, scrolledtext
-from PIL import Image, ImageTk
+
 
 
 # Connect to server
@@ -17,15 +17,6 @@ window = tk.Tk()
 window.title("Flight Info")
 window.geometry("600x500")
 window.resizable(False, False)
-
-
-# Show UoB logo
-try:
-    logo = Image.open("uob_logo.png").resize((100, 100))
-    logo_img = ImageTk.PhotoImage(logo)
-    tk.Label(window, image=logo_img).pack(pady=5)
-except:
-    pass  # Don't crash if image is missing
 
 
 # Send user name
