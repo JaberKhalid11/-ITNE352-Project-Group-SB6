@@ -4,7 +4,6 @@ import tkinter as tk
 from tkinter import messagebox, scrolledtext
 
 
-
 # Connect to server
 host = "127.0.0.1"
 port = 5050
