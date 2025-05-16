@@ -6,9 +6,16 @@ import requests
 import os
 
 
+<<<<<<< HEAD
 # Setup server
 host = "127.0.0.1"
 port = 5050
+=======
+
+###creat the TCP server
+host="127.0.0.1"
+port=5050
+>>>>>>> 9ab38c37f4f9223bbb18fb5a13f3ce18fefe36d5
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.bind((host, port))
 server_socket.listen(5)
