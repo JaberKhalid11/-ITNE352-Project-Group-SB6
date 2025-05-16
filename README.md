@@ -3,7 +3,7 @@
 Multithreaded Flight Arrival Client/Server System
 
 ## Project Description
-A Python-based networked client-server system that retrieves live flight data from [aviationstack.com](https://aviationstack.com) and allows multiple clients to query it simultaneously. The project uses TCP sockets, threading, and JSON-based data exchange.
+This project is a Python program that shows live flight information using a simple client and server system. The server connects to an online flight API and collects flight data for a selected airport. The client has a user-friendly window where users can click buttons to see arrived flights, delayed flights, or search for flight details using the IATA code. The system supports many users at the same time using threads. It helps students learn how to build real networking apps using sockets, threads, and graphical interfaces in Python.
 
 ## Semester
 Semester(2) 2024-2025
@@ -38,7 +38,6 @@ Semester(2) 2024-2025
 To run this project, you need:
 - Python 3
 - `requests` library (install using `pip install requests`)
-- `Pillow` library (install using `pip install pillow`)
 - Internet connection to fetch live flight data
 
 ---
@@ -117,4 +116,4 @@ info.
 - https://aviationstack.com/documentation
 - https://realpython.com/python-sockets/
 - https://docs.python.org/3/library/tk.html
-- https://pillow.readthedocs.io/
+
